@@ -1,0 +1,28 @@
+﻿@page "/beers"
+@using BlazorCrud.Data
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h3>Beers</h3>
+
+<table class="table">
+    @if (response != null && response.Data != null) {
+        
+    @foreach (var item in response.Data)
+       {
+           <tr>
+               <td>@item.Id</td>
+               <td>@item.Name</td>
+               <td>@item.Brand</td>
+           </tr>
+       }
+    }
+
+</table>
+@code {
+    public string url = "/api/beer";
+    public DefaultResponse response = new DefaultResponse();
+    protected override async Task OnInitializedAsync() =>
+    response = await Http.GetFromJsonAsync<DefaultResponse>(url);
+}
