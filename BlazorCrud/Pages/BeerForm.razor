@@ -1,0 +1,76 @@
+﻿@page "/beerForm"
+@page "/beerForm/{Id:int}"
+@using Data
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavManager
+<h3>BeerForm</h3>
+
+<EditForm Model="@beer">
+    <div class="container-fluid">
+        
+        <div class="form-group row mb-1">
+            <label class="col-sm-3"></label>
+            <div class="col-sm-9">
+                <InputNumber class="form-control" @bind-Value="@beer.Id" readonly></InputNumber>
+            </div>
+        </div>
+
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Name</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@beer.Name"></InputText>
+            </div>
+        </div>
+
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Brand</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@beer.Brand"></InputText>
+            </div>
+        </div>
+
+        <div class="form-group row mb-1">
+            <div class="col-sm-12">
+                <button class="btn btn-primary" @onclick="Save">Save</button>
+            </div>
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Beer beer = new Beer();
+    DefaultResponse<object> response = new DefaultResponse<object>();
+    DefaultResponse<Beer> beerResponse = new DefaultResponse<Beer>();
+    public string url = "/api/beer";
+
+    private async Task Save() 
+    {
+        if (Id != 0) 
+        {
+            var result = await Http.PutAsJsonAsync<Beer>(url, beer);
+            response = result.Content.ReadFromJsonAsync<DefaultResponse<object>>().Result;
+        }
+        else 
+        {
+            var result = await Http.PostAsJsonAsync<Beer>(url, beer);
+            response = result.Content.ReadFromJsonAsync<DefaultResponse<object>>().Result;
+        }
+        NavManager.NavigateTo("/beers");
+    }
+
+    protected override async Task OnInitializedAsync() 
+    { 
+        if (Id!=0) 
+        {
+            beerResponse = await Http.GetFromJsonAsync<DefaultResponse<Beer>>(url + "/" + Id);
+            beer = beerResponse.Data;
+        }
+    }
+
+}
